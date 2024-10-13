@@ -1,18 +1,17 @@
 package com.plurasight;
 
 import java.io.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class App {
     public static void main(String[] args) throws IOException {
         Scanner keyboard = new Scanner(System.in);
-        HashMap<String, Transaction> transactions = getTransactions();
+        ArrayList<Transaction> transactions = getTransactions();
 
         while(true){
             displayCommands();
@@ -21,10 +20,8 @@ public class App {
 
             switch (option){
                 case "l":
-                    for (Transaction transaction : transactions.values()){
-                        transaction.listDetails();
-                        System.out.println("------------");
-                    }
+                    displayLedger(transactions, keyboard);
+                    break;
                 case "d":
                     addDeposit(keyboard);
                     break;
@@ -38,8 +35,8 @@ public class App {
 
 
     }
-    public static HashMap<String,Transaction> getTransactions(){
-        HashMap<String, Transaction> transactions = new HashMap<>();
+    public static ArrayList<Transaction> getTransactions(){
+        ArrayList<Transaction> transactions = new ArrayList<>();
         try {
             FileReader fr = new FileReader("src/main/resources/transactions.csv");
             // create a BufferedReader to manage input stream
@@ -59,7 +56,7 @@ public class App {
                 String vendor = lineSplit[3];
                 double amount = Double.parseDouble(lineSplit[4]);
 
-                transactions.put(vendor,new Transaction(date,time,description,vendor,amount));
+                transactions.add(new Transaction(date,time,description,vendor,amount));
             }
 
             br.close();
@@ -67,6 +64,7 @@ public class App {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Collections.sort(transactions);
         return transactions;
     }
 
@@ -119,17 +117,59 @@ public class App {
                     continue;
 
                 } else if(addAnother.equalsIgnoreCase("n")) {
+                    //Release file
+                    bufWriter.close();
                     break;
                 }
             }
-
-            //Release file
-            bufWriter.close();
 
         }catch (IOException e){
             e.printStackTrace();
         }
     }
 
+    //Display ledger
+    public static void displayLedger(ArrayList<Transaction>transactions, Scanner keyboard){
+        while (true){
+            System.out.print("""
+                Ledger Commands
+                
+                A - All Entries
+                D - Show Deposits
+                P - Show Payments
+                H - Home Page
+                
+                Enter your command:""");
+            String option = keyboard.nextLine().toLowerCase();
+            System.out.println("------------");
 
+            switch (option){
+                case "a":
+                    for (Transaction transaction : transactions){
+                        transaction.listDetails();
+                        System.out.println("------------");
+                    }
+                    break;
+                case "d":
+                    for (Transaction transaction: transactions){
+                        if (transaction.getDescription().contains("Deposit") || transaction.getAmount() > 0){
+                            transaction.listDetails();
+                            System.out.println("------------");
+                        }
+                    }
+                    break;
+                case "p":
+                    for (Transaction transaction: transactions){
+                        if (transaction.getAmount() < 0){
+                            transaction.listDetails();
+                            System.out.println("------------");
+                        }
+                    }
+                    System.out.println("Feature coming soon!\n");
+                    break;
+                case "h":
+                    return;
+            }
+        }
+    }
 }

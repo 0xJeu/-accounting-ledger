@@ -1,12 +1,16 @@
 package com.plurasight;
 
-public class Transaction {
-private String date, time, description, vendor;
-private double amount;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+public class Transaction implements Comparable<Transaction> {
+    private LocalDateTime dateTime;
+    private String description, vendor;
+    private double amount;
 
     public Transaction(String date, String time, String description, String vendor, double amount) {
-        this.date = date;
-        this.time = time;
+        this.dateTime = LocalDateTime.of(LocalDate.parse(date), LocalTime.parse(time));
         this.description = description;
         this.vendor = vendor;
         this.amount = amount;
@@ -24,11 +28,11 @@ private double amount;
 
     //Getters
     public String getDate() {
-        return date;
+        return dateTime.toLocalDate().toString();
     }
 
     public String getTime() {
-        return time;
+        return dateTime.toLocalTime().toString();
     }
 
     public String getDescription() {
@@ -44,12 +48,10 @@ private double amount;
     }
 
     //Setters
-    public void setDate(String date) {
-        this.date = date;
-    }
 
-    public void setTime(String time) {
-        this.time = time;
+
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
     }
 
     public void setDescription(String description) {
@@ -64,4 +66,8 @@ private double amount;
         this.amount = amount;
     }
 
+    @Override
+    public int compareTo(Transaction o) {
+        return this.dateTime.compareTo(o.dateTime);
+    }
 }
