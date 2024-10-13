@@ -1,21 +1,41 @@
 package com.plurasight;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Scanner keyboard = new Scanner(System.in);
         HashMap<String, Transaction> transactions = getTransactions();
 
-        for (Transaction transaction : transactions.values()){
-            transaction.listDetails();
+        while(true){
+            displayCommands();
+            String option = keyboard.nextLine().toLowerCase();
             System.out.println("------------");
+
+            switch (option){
+                case "l":
+                    for (Transaction transaction : transactions.values()){
+                        transaction.listDetails();
+                        System.out.println("------------");
+                    }
+                case "d":
+                    addDeposit(keyboard);
+                    break;
+                case "x":
+                    System.exit(0);
+
+            }
+
         }
+
+
 
     }
     public static HashMap<String,Transaction> getTransactions(){
@@ -65,8 +85,50 @@ public class App {
     }
 
     //Add deposit method
-    public static void addDeposit(Transaction transaction, Scanner keyboard){
+    public static void addDeposit(Scanner keyboard) {
+        try {
+            //Format date and time
+            DateTimeFormatter formattedDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter formattedTime = DateTimeFormatter.ofPattern("HH:mm:ss");
 
+            //Create bufWriter to write to csv file
+            BufferedWriter bufWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv",true));
+
+            while (true){
+                //User input
+                System.out.print("Please enter the amount you wish to deposit (0 to exit to main menu): ");
+                double depositAmount = Double.parseDouble(keyboard.nextLine());
+                if (depositAmount == 0){
+                    break;
+                }
+
+                //Obtain date and time
+                LocalDateTime today = LocalDateTime.now();
+                String date = today.format(formattedDate);
+                String time = today.format(formattedTime);
+
+                //Format transaction entry and write to file
+                String transactionEntry = String.format("\n%s|%s|%s|%s|%.2f", date, time, "User Deposit", "Vendor N/A", depositAmount);
+                bufWriter.write(transactionEntry);
+                System.out.println("Deposit submitted!");
+
+                //Ask user for additional deposits
+                System.out.println("Do you want to add another deposit (Y or N)? ");
+                String addAnother = keyboard.nextLine();
+                if(addAnother.equalsIgnoreCase("y")){
+                    continue;
+
+                } else if(addAnother.equalsIgnoreCase("n")) {
+                    break;
+                }
+            }
+
+            //Release file
+            bufWriter.close();
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
 
