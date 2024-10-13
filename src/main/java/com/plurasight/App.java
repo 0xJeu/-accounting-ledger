@@ -11,9 +11,10 @@ import java.util.regex.Pattern;
 public class App {
     public static void main(String[] args) throws IOException {
         Scanner keyboard = new Scanner(System.in);
-        ArrayList<Transaction> transactions = getTransactions();
 
         while(true){
+            ArrayList<Transaction> transactions = getTransactions();
+
             displayCommands();
             String option = keyboard.nextLine().toLowerCase();
             System.out.println("------------");
@@ -27,7 +28,8 @@ public class App {
                     break;
                 case "x":
                     System.exit(0);
-
+                default:
+                    System.out.println("Invalid command entered. please try again.");
             }
 
         }
@@ -47,10 +49,9 @@ public class App {
                 if (input.startsWith("date")){
                     continue;
                 }
-                // date|time|description|vendor|amount
+                // date|time|description|vendor|amount ->CSV headers for reference
                 String[] lineSplit = input.split(Pattern.quote("|"));
                 String date= lineSplit[0];
-
                 String time = lineSplit[1];
                 String description = lineSplit[2];
                 String vendor = lineSplit[3];
@@ -121,6 +122,10 @@ public class App {
                     bufWriter.close();
                     break;
                 }
+                else {
+                    System.out.println("Invalid command entered. please try again.");
+                    continue;
+                }
             }
 
         }catch (IOException e){
@@ -128,7 +133,7 @@ public class App {
         }
     }
 
-    //Display ledger
+    //Display ledger screen
     public static void displayLedger(ArrayList<Transaction>transactions, Scanner keyboard){
         while (true){
             System.out.print("""
@@ -169,6 +174,8 @@ public class App {
                     break;
                 case "h":
                     return;
+                default:
+                    System.out.println("Invalid command entered. please try again.");
             }
         }
     }
