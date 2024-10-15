@@ -9,7 +9,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class App {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Scanner keyboard = new Scanner(System.in);
 
         while(true){
@@ -26,6 +26,9 @@ public class App {
                 case "d":
                     addDeposit(keyboard);
                     break;
+                case "p":
+                    makePayment(keyboard);
+                    break;
                 case "x":
                     System.exit(0);
                 default:
@@ -34,9 +37,20 @@ public class App {
 
         }
 
-
-
     }
+    // Display commands
+     public static void displayCommands(){
+        System.out.print("""
+                Main Menu
+                
+                D - Add Deposit
+                P - Make Payment
+                L - Ledger
+                X - Exit
+                
+                Enter your command:""");
+    }
+
     public static ArrayList<Transaction> getTransactions(){
         ArrayList<Transaction> transactions = new ArrayList<>();
         try {
@@ -67,20 +81,6 @@ public class App {
         }
         Collections.sort(transactions);
         return transactions;
-    }
-
-    // Display commands
-    public static void displayCommands(){
-        System.out.print("""
-                What do you want to do?
-                
-                D - Add Deposit
-                P - Make Payment
-                L - Ledger
-                X - Exit
-                
-                Enter your command:""");
-
     }
 
     //Add deposit method
@@ -170,7 +170,6 @@ public class App {
                             System.out.println("------------");
                         }
                     }
-                    System.out.println("Feature coming soon!\n");
                     break;
                 case "h":
                     return;
@@ -179,4 +178,56 @@ public class App {
             }
         }
     }
+
+    public static void makePayment(Scanner keyboard) {
+        try {
+            //Format date and time
+            DateTimeFormatter formattedDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter formattedTime = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+            //Create bufWriter to write to csv file
+            BufferedWriter bufWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv",true));
+
+            while (true) {
+                //Obtain date and time
+                LocalDateTime today = LocalDateTime.now();
+                String date = today.format(formattedDate);
+                String time = today.format(formattedTime);
+
+                // date|time|description|vendor|amount ->CSV headers for reference
+
+                System.out.print("Please enter description: ");
+                String description = keyboard.nextLine();
+                System.out.print("Please enter Vendor (if none, Please enter 'N/A'): ");
+                String vendor = keyboard.nextLine();
+                System.out.print("Please enter payment amount: ");
+                double paymentAmount = -Double.parseDouble(keyboard.nextLine());
+
+                if (vendor.equalsIgnoreCase("N/A")) {
+                    vendor = "Vendor N/A";
+                }
+
+                //Format transaction entry and write to file
+                String transactionEntry = String.format("\n%s|%s|%s|%s|%.2f", date, time, description, vendor, paymentAmount);
+                bufWriter.write(transactionEntry);
+                System.out.println("Deposit submitted!");
+
+                //Ask user for additional payments
+                System.out.println("Do you want to add another payment (Y or N)? ");
+                String addAnother = keyboard.nextLine();
+                if(addAnother.equalsIgnoreCase("y")){
+                    continue;
+
+                } else if(addAnother.equalsIgnoreCase("n")) {
+                    //Release file
+                    bufWriter.close();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }

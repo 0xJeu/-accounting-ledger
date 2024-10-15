@@ -49,7 +49,6 @@ public class Transaction implements Comparable<Transaction> {
 
     //Setters
 
-
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
