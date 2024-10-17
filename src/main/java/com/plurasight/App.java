@@ -248,7 +248,7 @@ public class App {
                     3 - Year To Date
                     4 - Previous Year
                     5 - Search by Vendor
-                    0 - Back to Main Menu
+                    0 - Back to Ledger Menu
                     
                     Choose a report:""");
             int option = Integer.parseInt(keyboard.nextLine());
