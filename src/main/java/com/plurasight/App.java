@@ -273,10 +273,13 @@ public class App {
         LocalDate today = LocalDate.now();
         LocalDate firstDayOfMonth = today.withDayOfMonth(1);
 //        System.out.println(firstDayOfMonth);
+        System.out.println("Month To Date Report");
+        System.out.println("-------------------");
+
 
         for (Transaction transaction : transactions) {
             LocalDate transactionDate = LocalDate.parse(transaction.getDate());
-            if (transactionDate.isAfter(firstDayOfMonth.minusDays(1)) && transactionDate.isBefore(today.minusDays(1))) {
+            if (transactionDate.isAfter(firstDayOfMonth.minusDays(1)) && transactionDate.isBefore(today.plusDays(1))) {
                 transaction.listDetails();
                 System.out.println("------------");
             }
