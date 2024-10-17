@@ -1,6 +1,7 @@
 package com.plurasight;
 
 import java.io.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -12,14 +13,14 @@ public class App {
     public static void main(String[] args) {
         Scanner keyboard = new Scanner(System.in);
 
-        while(true){
+        while (true) {
             ArrayList<Transaction> transactions = getTransactions();
 
             displayCommands();
             String option = keyboard.nextLine().toLowerCase();
             System.out.println("------------");
 
-            switch (option){
+            switch (option) {
                 case "l":
                     displayLedger(transactions, keyboard);
                     break;
@@ -38,8 +39,9 @@ public class App {
         }
 
     }
+
     // Display commands
-     public static void displayCommands(){
+    public static void displayCommands() {
         System.out.print("""
                 Main Menu
                 
@@ -51,7 +53,8 @@ public class App {
                 Enter your command:""");
     }
 
-    public static ArrayList<Transaction> getTransactions(){
+    //Retrieve transactions from CSV
+    public static ArrayList<Transaction> getTransactions() {
         ArrayList<Transaction> transactions = new ArrayList<>();
         try {
             FileReader fr = new FileReader("src/main/resources/transactions.csv");
@@ -60,18 +63,18 @@ public class App {
             String input;
             // read until there is no more data
             while ((input = br.readLine()) != null) {
-                if (input.startsWith("date")){
+                if (input.startsWith("date")) {
                     continue;
                 }
                 // date|time|description|vendor|amount ->CSV headers for reference
                 String[] lineSplit = input.split(Pattern.quote("|"));
-                String date= lineSplit[0];
+                String date = lineSplit[0];
                 String time = lineSplit[1];
                 String description = lineSplit[2];
                 String vendor = lineSplit[3];
                 double amount = Double.parseDouble(lineSplit[4]);
 
-                transactions.add(new Transaction(date,time,description,vendor,amount));
+                transactions.add(new Transaction(date, time, description, vendor, amount));
             }
 
             br.close();
@@ -91,13 +94,13 @@ public class App {
             DateTimeFormatter formattedTime = DateTimeFormatter.ofPattern("HH:mm:ss");
 
             //Create bufWriter to write to csv file
-            BufferedWriter bufWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv",true));
+            BufferedWriter bufWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv", true));
 
-            while (true){
+            while (true) {
                 //User input
                 System.out.print("Please enter the amount you wish to deposit (0 to exit to main menu): ");
                 double depositAmount = Double.parseDouble(keyboard.nextLine());
-                if (depositAmount == 0){
+                if (depositAmount == 0) {
                     break;
                 }
 
@@ -114,71 +117,25 @@ public class App {
                 //Ask user for additional deposits
                 System.out.println("Do you want to add another deposit (Y or N)? ");
                 String addAnother = keyboard.nextLine();
-                if(addAnother.equalsIgnoreCase("y")){
+                if (addAnother.equalsIgnoreCase("y")) {
                     continue;
 
-                } else if(addAnother.equalsIgnoreCase("n")) {
+                } else if (addAnother.equalsIgnoreCase("n")) {
                     //Release file
                     bufWriter.close();
                     break;
-                }
-                else {
+                } else {
                     System.out.println("Invalid command entered. please try again.");
                     continue;
                 }
             }
 
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    //Display ledger screen
-    public static void displayLedger(ArrayList<Transaction>transactions, Scanner keyboard){
-        while (true){
-            System.out.print("""
-                Ledger Commands
-                
-                A - All Entries
-                D - Show Deposits
-                P - Show Payments
-                H - Home Page
-                
-                Enter your command:""");
-            String option = keyboard.nextLine().toLowerCase();
-            System.out.println("------------");
-
-            switch (option){
-                case "a":
-                    for (Transaction transaction : transactions){
-                        transaction.listDetails();
-                        System.out.println("------------");
-                    }
-                    break;
-                case "d":
-                    for (Transaction transaction: transactions){
-                        if (transaction.getDescription().contains("Deposit") || transaction.getAmount() > 0){
-                            transaction.listDetails();
-                            System.out.println("------------");
-                        }
-                    }
-                    break;
-                case "p":
-                    for (Transaction transaction: transactions){
-                        if (transaction.getAmount() < 0){
-                            transaction.listDetails();
-                            System.out.println("------------");
-                        }
-                    }
-                    break;
-                case "h":
-                    return;
-                default:
-                    System.out.println("Invalid command entered. please try again.");
-            }
-        }
-    }
-
+    //Make payment method
     public static void makePayment(Scanner keyboard) {
         try {
             //Format date and time
@@ -186,7 +143,7 @@ public class App {
             DateTimeFormatter formattedTime = DateTimeFormatter.ofPattern("HH:mm:ss");
 
             //Create bufWriter to write to csv file
-            BufferedWriter bufWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv",true));
+            BufferedWriter bufWriter = new BufferedWriter(new FileWriter("src/main/resources/transactions.csv", true));
 
             while (true) {
                 //Obtain date and time
@@ -215,10 +172,10 @@ public class App {
                 //Ask user for additional payments
                 System.out.println("Do you want to add another payment (Y or N)? ");
                 String addAnother = keyboard.nextLine();
-                if(addAnother.equalsIgnoreCase("y")){
+                if (addAnother.equalsIgnoreCase("y")) {
                     continue;
 
-                } else if(addAnother.equalsIgnoreCase("n")) {
+                } else if (addAnother.equalsIgnoreCase("n")) {
                     //Release file
                     bufWriter.close();
                     break;
@@ -226,6 +183,103 @@ public class App {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+    }
+
+    //Display ledger screen
+    public static void displayLedger(ArrayList<Transaction> transactions, Scanner keyboard) {
+        while (true) {
+            System.out.print("""
+                    Ledger Commands
+                    
+                    A - All Entries
+                    D - Show Deposits
+                    P - Show Payments
+                    R - Reports
+                    H - Home Page
+                    
+                    Enter your command:""");
+            String option = keyboard.nextLine().toLowerCase();
+            System.out.println("------------");
+
+            switch (option) {
+                case "a":
+                    for (Transaction transaction : transactions) {
+                        transaction.listDetails();
+                        System.out.println("------------");
+                    }
+                    break;
+                case "d":
+                    for (Transaction transaction : transactions) {
+                        if (transaction.getDescription().contains("Deposit") || transaction.getAmount() > 0) {
+                            transaction.listDetails();
+                            System.out.println("------------");
+                        }
+                    }
+                    break;
+                case "p":
+                    for (Transaction transaction : transactions) {
+                        if (transaction.getAmount() < 0) {
+                            transaction.listDetails();
+                            System.out.println("------------");
+                        }
+                    }
+                    break;
+                case "r":
+                    displayReport(transactions, keyboard);
+                    break;
+                case "h":
+                    return;
+                default:
+                    System.out.println("Invalid command entered. please try again.");
+            }
+        }
+    }
+
+    //Display report screen
+    public static void displayReport(ArrayList<Transaction> transactions, Scanner keyboard) {
+        while (true) {
+            System.out.print("""
+                    Report Commands
+                    
+                    1 - Month To Date
+                    2 - Previous Month
+                    3 - Year To Date
+                    4 - Previous Year
+                    5 - Search by Vendor
+                    0 - Back to Main Menu
+                    
+                    Choose a report:""");
+            int option = Integer.parseInt(keyboard.nextLine());
+            System.out.println("------------");
+
+            switch (option) {
+                case 1:
+                    generateMonthToDateReport(transactions);
+                    break;
+                case 2, 3, 4, 5:
+                    System.out.println("Feature coming soon!");
+                    break;
+                case 0:
+                    return;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+    }
+
+    private static void generateMonthToDateReport(ArrayList<Transaction> transactions) {
+        LocalDate today = LocalDate.now();
+        LocalDate firstDayOfMonth = today.withDayOfMonth(1);
+//        System.out.println(firstDayOfMonth);
+
+        for (Transaction transaction : transactions) {
+            LocalDate transactionDate = LocalDate.parse(transaction.getDate());
+            if (transactionDate.isAfter(firstDayOfMonth.minusDays(1)) && transactionDate.isBefore(today.minusDays(1))) {
+                transaction.listDetails();
+                System.out.println("------------");
+            }
         }
 
     }
