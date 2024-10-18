@@ -59,10 +59,10 @@ public class App {
         try {
             FileReader fr = new FileReader("src/main/resources/transactions.csv");
             // create a BufferedReader to manage input stream
-            BufferedReader br = new BufferedReader(fr);
+            BufferedReader bufReader = new BufferedReader(fr);
             String input;
             // read until there is no more data
-            while ((input = br.readLine()) != null) {
+            while ((input = bufReader.readLine()) != null) {
                 if (input.startsWith("date")) {
                     continue;
                 }
@@ -77,7 +77,7 @@ public class App {
                 transactions.add(new Transaction(date, time, description, vendor, amount));
             }
 
-            br.close();
+            bufReader.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -151,6 +151,7 @@ public class App {
                 String date = today.format(formattedDate);
                 String time = today.format(formattedTime);
 
+
                 // date|time|description|vendor|amount ->CSV headers for reference
 
                 System.out.print("Please enter description: ");
@@ -167,7 +168,7 @@ public class App {
                 //Format transaction entry and write to file
                 String transactionEntry = String.format("\n%s|%s|%s|%s|%.2f", date, time, description, vendor, paymentAmount);
                 bufWriter.write(transactionEntry);
-                System.out.println("Deposit submitted!");
+                System.out.println("Payment submitted!");
 
                 //Ask user for additional payments
                 System.out.println("Do you want to add another payment (Y or N)? ");
@@ -275,7 +276,6 @@ public class App {
 //        System.out.println(firstDayOfMonth);
         System.out.println("Month To Date Report");
         System.out.println("-------------------");
-
 
         for (Transaction transaction : transactions) {
             LocalDate transactionDate = LocalDate.parse(transaction.getDate());
